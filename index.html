@@ -8,16 +8,17 @@
     <style>
         :root {
             --primary: #4f46e5;
-            --bg-light: #f9fafb;
+            --bg-light: #f3f4f6;
         }
         body {
             background-color: var(--bg-light);
-            font-family: system-ui, -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         }
-        /* 頂部橫向背景圖樣式 */
+        
+        /* 頂部橫向背景圖優化 */
         .hero-section {
-            height: 250px;
-            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://t5749850-glitch.github.io/TPE-to-OKA/images/HOME.jpg');
+            height: 300px;
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.6)), url('https://t5749850-glitch.github.io/TPE-to-OKA/images/HOME.jpg');
             background-size: cover;
             background-position: center;
             display: flex;
@@ -25,15 +26,21 @@
             justify-content: center;
             color: white;
             text-align: center;
+            position: relative;
         }
+
         .day-card {
             background: white;
-            border-radius: 12px;
-            margin-bottom: 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.25rem;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease;
         }
+        .day-card.open {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
         .day-header {
             padding: 1.25rem;
             cursor: pointer;
@@ -42,86 +49,114 @@
             align-items: center;
             background: white;
         }
-        .day-header:hover { background: #f8fafc; }
-        .day-content { display: none; border-top: 1px solid #f1f5f9; }
+        .day-content { display: none; border-top: 1px solid #f3f4f6; }
         .day-card.open .day-content { display: block; }
         .day-card.open .toggle-icon { transform: rotate(90deg); }
-        .toggle-icon { transition: transform 0.2s; color: #94a3b8; }
+        .toggle-icon { transition: transform 0.3s; color: #94a3b8; }
         
+        /* 照片顯示優化 */
+        .image-container {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            border-radius: 12px;
+            margin-bottom: 1.5rem;
+            background: #e5e7eb;
+            position: relative;
+            cursor: zoom-in;
+        }
+        .image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .image-container:hover img {
+            transform: scale(1.03);
+        }
+
         .timeline-event {
             position: relative;
             padding-left: 2rem;
             margin-bottom: 1.5rem;
-            border-left: 2px solid #e2e8f0;
+            border-left: 2px solid #e5e7eb;
         }
         .timeline-event::before {
             content: '';
             position: absolute;
             left: -7px;
-            top: 0;
+            top: 4px;
             width: 12px;
             height: 12px;
             border-radius: 50%;
             background: var(--primary);
             border: 2px solid white;
         }
-        .event-time { font-weight: 600; color: var(--primary); font-size: 0.875rem; }
-        
-        /* Highlight 樣式：針對沒有額外提示的事件進行視覺強化 */
-        .event-highlight {
-            color: #111827; /* 更深、更醒目的文字顏色 */
-            font-size: 1.05rem;
-        }
 
         .filter-button {
-            padding: 0.5rem 1rem;
+            padding: 0.6rem 1.25rem;
             border-radius: 9999px;
-            background: #e2e8f0;
-            color: #475569;
+            background: white;
+            color: #4b5563;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
             transition: all 0.2s;
-            white-space: nowrap;
             font-size: 0.875rem;
             font-weight: 500;
+            border: 1px solid #e5e7eb;
         }
         .filter-button.active {
             background: var(--primary);
             color: white;
+            border-color: var(--primary);
         }
-        
+
+        /* 燈箱效果 */
+        #lightbox {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        #lightbox img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 4px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
         .todo-item {
             display: flex;
             align-items: center;
-            padding: 0.75rem;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            transition: background 0.2s;
         }
-        .todo-text.done { text-decoration: line-through; color: #94a3b8; }
-
-        .image-placeholder {
-            width: 100%;
-            height: 150px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-            background-color: #eee;
-        }
+        .todo-text.done { text-decoration: line-through; color: #9ca3af; }
     </style>
 </head>
 <body>
 
-    <!-- 頂部橫向背景圖區域 -->
-    <div class="hero-section mb-6">
-        <div>
-            <h1 class="text-4xl md:text-5xl font-bold mb-2">沖繩4-5日遊</h1>
-            <p class="text-lg opacity-90">沉浸式水族館 & 城市探索 — 2026/04/26 至 04/29.30</p>
+    <!-- 燈箱視窗 -->
+    <div id="lightbox" onclick="this.style.display='none'">
+        <img id="lightbox-img" src="" alt="放大預覽">
+    </div>
+
+    <div class="hero-section">
+        <div class="px-4">
+            <h1 class="text-4xl md:text-5xl font-black mb-3 drop-shadow-lg">沖繩 4-5 日遊</h1>
+            <p class="text-lg font-medium opacity-95 bg-black/20 backdrop-blur-sm inline-block px-4 py-1 rounded-full">
+                2026/04/26 — 04/30 沉浸式海島探索
+            </p>
         </div>
     </div>
 
-    <div class="max-w-4xl mx-auto px-4 pb-8">
-        <header class="mb-8">
-            <!-- 導覽切換按鈕：移除 overflow-x-auto 與 scrollbar-hide，改用 flex-wrap -->
-            <div class="flex flex-wrap gap-2 pb-4 border-b border-gray-100" id="filter-bar">
+    <div class="max-w-4xl mx-auto px-4 -mt-8 relative z-10 pb-12">
+        <header class="mb-6">
+            <div class="flex flex-wrap gap-2 p-2 bg-white/80 backdrop-blur shadow-sm rounded-2xl border border-white" id="filter-bar">
                 <button class="filter-button" data-filter="checklist">📝 準備清單</button>
                 <button class="filter-button active" data-filter="all">全部行程</button>
             </div>
@@ -129,52 +164,48 @@
 
         <!-- 行程列表內容區 -->
         <div id="itinerary-timeline" class="space-y-4">
-            <div class="text-center p-10 text-gray-500">正在初始化系統並載入行程...</div>
+            <div class="bg-white p-12 rounded-2xl text-center text-gray-400 shadow-sm">
+                <div class="animate-spin inline-block w-8 h-8 border-4 border-indigo-500 border-t-transparent rounded-full mb-4"></div>
+                <p>載入沖繩精選行程中...</p>
+            </div>
         </div>
 
         <!-- 準備清單內容區 -->
-        <div id="checklist-view" class="hidden bg-white rounded-xl shadow p-6">
+        <div id="checklist-view" class="hidden bg-white rounded-2xl shadow-sm p-6 border border-gray-100">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-bold">準備清單</h2>
-                <span id="sync-status" class="text-sm text-gray-400">正在同步...</span>
+                <h2 class="text-2xl font-bold text-gray-800">準備清單</h2>
+                <span id="sync-status" class="text-xs font-medium px-3 py-1 bg-gray-100 text-gray-500 rounded-full">同步中...</span>
             </div>
-            <div id="checklist-content" class="space-y-2"></div>
+            <div id="checklist-content" class="space-y-1"></div>
         </div>
     </div>
 
     <script>
-        // --- 設定 ---
-
         const ITINERARY_GIST_URL = 'https://gist.githubusercontent.com/t5749850-glitch/c29c66e57babe740437ba6e32df1aaf7/raw/nahaitinerary.json'; 
         const GIST_ID = 'a88a62f92e6fb58e173bb5f04388deea'; 
         const FILE_NAME = 'Travel_List.md'; 
         const GIST_URL = `https://gist.githubusercontent.com/raw/${GIST_ID}/${FILE_NAME}`;
 
-        // --- 狀態 ---
         let itineraryData = [];
 
-        // --- 初始化 ---
         async function initApp() {
-            const timeline = document.getElementById('itinerary-timeline');
-            
             try {
                 const res = await fetch(ITINERARY_GIST_URL + '?t=' + new Date().getTime());
-                if (!res.ok) throw new Error('無法取得行程資料');
-                
+                if (!res.ok) throw new Error('Fetch failed');
                 itineraryData = await res.json();
                 generateDayButtons();
                 renderItinerary('all');
             } catch (e) {
-                console.error(e);
-                timeline.innerHTML = `<div class="p-6 bg-red-50 text-red-600 rounded-lg">⚠️ 行程載入失敗，請確認網路連線。</div>`;
+                document.getElementById('itinerary-timeline').innerHTML = `
+                    <div class="p-8 bg-red-50 text-red-600 rounded-2xl border border-red-100 text-center">
+                        <p class="font-bold">行程載入失敗</p>
+                        <p class="text-sm opacity-80">請確認網路連線或 Gist 連結是否正確</p>
+                    </div>`;
             }
         }
 
-        // --- 動態生成日期按鈕 ---
         function generateDayButtons() {
             const filterBar = document.getElementById('filter-bar');
-            
-            // 將 Day 按鈕插入在最後面
             itineraryData.forEach(day => {
                 const btn = document.createElement('button');
                 btn.className = 'filter-button';
@@ -183,20 +214,24 @@
                 btn.onclick = () => handleFilterClick(btn);
                 filterBar.appendChild(btn);
             });
-
             filterBar.querySelector('[data-filter="all"]').onclick = function() { handleFilterClick(this); };
             filterBar.querySelector('[data-filter="checklist"]').onclick = function() { handleFilterClick(this); };
         }
 
-        // --- 處理按鈕點擊 ---
         function handleFilterClick(clickedBtn) {
             document.querySelectorAll('.filter-button').forEach(b => b.classList.remove('active'));
             clickedBtn.classList.add('active');
             renderItinerary(clickedBtn.dataset.filter);
-            window.scrollTo({ top: 220, behavior: 'smooth' });
+            window.scrollTo({ top: 180, behavior: 'smooth' });
         }
 
-        // --- 行程渲染邏輯 ---
+        function openLightbox(src) {
+            const lb = document.getElementById('lightbox');
+            const img = document.getElementById('lightbox-img');
+            img.src = src;
+            lb.style.display = 'flex';
+        }
+
         function renderItinerary(filter) {
             const timeline = document.getElementById('itinerary-timeline');
             const checklistView = document.getElementById('checklist-view');
@@ -216,40 +251,47 @@
                 if (filter === 'all' || String(day.day) === String(filter)) {
                     const card = document.createElement('div');
                     card.className = 'day-card open';
-                    card.id = `day-card-${day.day}`;
+                    
+                    const eventsHtml = day.events.map(e => `
+                        <div class="timeline-event">
+                            <div class="text-xs font-bold text-indigo-500 mb-1 uppercase tracking-wider">${e.time}</div>
+                            <div class="flex justify-between items-start gap-4">
+                                <div class="flex-1">
+                                    <p class="text-gray-900 font-semibold leading-snug">${e.detail}</p>
+                                    ${e.transport ? `<p class="text-xs text-gray-400 mt-1 flex items-center"><span class="mr-1">🚗</span> ${e.transport}</p>` : ''}
+                                </div>
+                                ${e.mapLocation ? `
+                                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.mapLocation)}" 
+                                       target="_blank" class="w-8 h-8 flex items-center justify-center bg-indigo-50 rounded-full text-indigo-600 shrink-0 hover:bg-indigo-600 hover:text-white transition-all">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </a>` : ''}
+                            </div>
+                        </div>
+                    `).join('');
+
                     card.innerHTML = `
                         <div class="day-header" onclick="this.parentElement.classList.toggle('open')">
-                            <div>
-                                <span class="bg-indigo-100 text-indigo-700 px-2 py-1 rounded text-xs font-bold mr-2">DAY ${day.day}</span>
-                                <h2 class="inline-block font-bold text-gray-700">${day.date} | ${day.city} · ${day.title}</h2>
+                            <div class="flex items-center gap-3">
+                                <span class="bg-indigo-600 text-white text-[10px] px-2 py-1 rounded-md font-black tracking-tighter">DAY ${day.day}</span>
+                                <h2 class="font-bold text-gray-800">${day.date} · ${day.city}</h2>
                             </div>
-                            <span class="toggle-icon">▶</span>
+                            <span class="toggle-icon text-xl">⌄</span>
                         </div>
-                        <div class="day-content">
-                            <div class="p-5">
-                                ${day.image ? `<div class="image-placeholder" style="background-image:url('${day.image}')"></div>` : ''}
-                                <div class="space-y-4">
-                                    ${day.events.map(e => {
-                                        const noSpecialInfo = !e.transport && !e.mapLocation;
-                                        return `
-                                        <div class="timeline-event">
-                                            <div class="event-time">${e.time}</div>
-                                            <div class="flex justify-between items-start">
-                                                <div class="text-gray-700">
-                                                    <p class="font-medium ${noSpecialInfo ? 'event-highlight' : ''}">${e.detail}</p>
-                                                    ${e.transport ? `<p class="text-xs text-gray-400 mt-1">🚗 ${e.transport}</p>` : ''}
-                                                </div>
-                                                ${e.mapLocation ? `
-                                                    <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.mapLocation)}" 
-                                                       target="_blank" class="p-2 bg-gray-50 rounded-full hover:bg-indigo-50 text-indigo-500 transition-colors">
-                                                       📍
-                                                    </a>` : ''}
-                                            </div>
-                                        </div>
-                                    `;}).join('')}
-                                </div>
-                                ${day.notes ? `<div class="mt-4 p-3 bg-amber-50 border-l-4 border-amber-400 text-amber-800 text-sm"><strong>💡 備註:</strong> ${day.notes}</div>` : ''}
-                            </div>
+                        <div class="day-content p-5">
+                            ${day.image ? `
+                                <div class="image-container shadow-sm" onclick="openLightbox('${day.image}')">
+                                    <img src="${day.image}" alt="${day.title}" loading="lazy">
+                                    <div class="absolute bottom-3 left-3 bg-black/50 backdrop-blur-sm text-white text-xs px-3 py-1 rounded-full font-medium">
+                                        ${day.title}
+                                    </div>
+                                </div>` : ''}
+                            <div class="space-y-2">${eventsHtml}</div>
+                            ${day.notes ? `<div class="mt-6 p-4 bg-amber-50 rounded-xl border-l-4 border-amber-400 text-amber-900 text-sm">
+                                <span class="font-bold block mb-1">💡 行程筆記</span> ${day.notes}
+                            </div>` : ''}
                         </div>
                     `;
                     timeline.appendChild(card);
@@ -257,21 +299,20 @@
             });
         }
 
-        // --- 準備清單讀取 ---
         async function loadChecklist() {
             const container = document.getElementById('checklist-content');
             const status = document.getElementById('sync-status');
-            container.innerHTML = '<div class="text-center py-10 text-gray-400">正在讀取 GitHub 清單...</div>';
+            container.innerHTML = '<div class="text-center py-12 text-gray-400 italic">正在獲取您的清單...</div>';
             
             try {
                 const res = await fetch(GIST_URL + '?t=' + new Date().getTime());
-                if (!res.ok) throw new Error();
                 const text = await res.text();
-                status.textContent = '✅ 已與 GitHub 同步';
+                status.textContent = '● 已同步雲端';
+                status.classList.replace('text-gray-500', 'text-green-600');
                 renderChecklist(text);
             } catch (e) {
-                status.textContent = '⚠️ 載入失敗，顯示離線版本';
-                renderChecklist("## 🚗 自駕必備\n- [ ] 台灣駕照正本\n- [ ] 日文譯本\n- [ ] 信用卡\n## 🛂 重要證件\n- [ ] 護照\n- [ ] Visit Japan Web");
+                status.textContent = '○ 離線模式';
+                renderChecklist("## 🚗 自駕必備\n- [ ] 台灣駕照正本\n- [ ] 日文譯本\n## 🛂 重要證件\n- [ ] 護照\n- [ ] Visit Japan Web");
             }
         }
 
@@ -284,7 +325,7 @@
                 const text = line.trim();
                 if (text.startsWith('##')) {
                     const h = document.createElement('div');
-                    h.className = 'font-bold text-gray-800 border-b pb-2 mb-2 mt-6';
+                    h.className = 'font-bold text-gray-500 text-xs uppercase tracking-widest mt-8 mb-3 px-2';
                     h.textContent = text.replace('##', '').trim();
                     container.appendChild(h);
                 } else if (text.includes('- [ ]') || text.startsWith('-')) {
@@ -292,12 +333,12 @@
                     if(!label) return;
                     
                     const item = document.createElement('div');
-                    item.className = 'todo-item hover:bg-gray-50 rounded-lg';
+                    item.className = 'todo-item hover:bg-gray-50 rounded-xl cursor-pointer';
                     const isChecked = saved[label] || false;
                     
                     item.innerHTML = `
-                        <input type="checkbox" class="w-5 h-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-3" ${isChecked ? 'checked' : ''}>
-                        <span class="todo-text ${isChecked ? 'done' : ''}">${label}</span>
+                        <input type="checkbox" class="w-6 h-6 rounded-lg border-gray-300 text-indigo-600 focus:ring-indigo-500 mr-4 transition-all" ${isChecked ? 'checked' : ''}>
+                        <span class="todo-text font-medium text-gray-700 ${isChecked ? 'done' : ''}">${label}</span>
                     `;
                     
                     item.onclick = (e) => {
@@ -316,5 +357,3 @@
     </script>
 </body>
 </html>
-
-
